@@ -6,6 +6,7 @@ import com.teameth.moviebooking.models.ReservationRequest;
 import com.teameth.moviebooking.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.authentication.UserServiceBeanDefinitionParser;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,7 +41,16 @@ public class ReservationController {
     public List<Reservation> getAllLocations(){
         return reservationService.findAllReservations();
     }
+    @RequestMapping("/ManageReservations")
+    @PreAuthorize("hasAuthority('CUST')")
 
+    public List<Reservation> getListOfReservationsPerUser(@RequestHeader("Authorization") String authHeader){
+        String uName = jwtTokenUtil.extraUsername(authHeader.split(" ")[1]);
+        User user = userService.getByUsername(uName);
+        return reservationService.findReservationByUserID(user.getId());
+
+       // return reservationService.findAllReservations();
+    }
     /*@RequestMapping(method = RequestMethod.POST ,value="/movieschedule/{scheduleId}/user/{userid}/reservation")
     public void saveNewReservation(@RequestBody ReservationRequest reservationRequest, @PathVariable Integer scheduleId ,@PathVariable Integer userid) throws ParseException {
 
@@ -57,7 +67,6 @@ public class ReservationController {
     public void saveNewReservation(@RequestHeader("Authorization") String authHeader,
                                    @RequestBody ReservationRequest reservationRequest, @PathVariable Integer scheduleId) throws ParseException {
         String uName = jwtTokenUtil.extraUsername(authHeader.split(" ")[1]);
-        System.out.println(reservationRequest.numberOfSeats);
         MovieSchedule movieSchedule= movieScheduleService.getMovieSchedule(scheduleId);
 
         Reservation reservation = new Reservation(0,
