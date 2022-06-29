@@ -9,4 +9,6 @@ import java.util.List;
 public interface ShowSeatRepository extends JpaRepository<ShowSeat,Integer> {
 
     List<ShowSeat> findByMovieScheduleMovieScheduleId(Integer scheduleId);
+
+    List<ShowSeat> findByReservationReservationId(Integer reservationID);
 }

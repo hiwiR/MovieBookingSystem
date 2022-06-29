@@ -23,6 +23,9 @@ public class ReservationRequest {
 
     public String seatIds;
 
+    private String user;
+    private String movieSchedule;
+
     //public String userId;
 
     public ReservationRequest() {
@@ -99,8 +102,7 @@ public class ReservationRequest {
         this.movieSchedule = movieSchedule;
     }
 
-    private String user;
-    private String movieSchedule;
+
 
 
 

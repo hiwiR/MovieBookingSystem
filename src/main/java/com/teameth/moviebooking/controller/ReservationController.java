@@ -38,37 +38,28 @@ public class ReservationController {
     UserService userService;
 
     @RequestMapping("/reservation")
-    public List<Reservation> getAllLocations(){
+    public List<Reservation> getAllReservations(){
         return reservationService.findAllReservations();
     }
-    @RequestMapping("/ManageReservations")
+    @RequestMapping("/ListPersonalReservations")
     @PreAuthorize("hasAuthority('CUST')")
 
     public List<Reservation> getListOfReservationsPerUser(@RequestHeader("Authorization") String authHeader){
         String uName = jwtTokenUtil.extraUsername(authHeader.split(" ")[1]);
         User user = userService.getByUsername(uName);
         return reservationService.findReservationByUserID(user.getId());
-
-       // return reservationService.findAllReservations();
     }
-    /*@RequestMapping(method = RequestMethod.POST ,value="/movieschedule/{scheduleId}/user/{userid}/reservation")
-    public void saveNewReservation(@RequestBody ReservationRequest reservationRequest, @PathVariable Integer scheduleId ,@PathVariable Integer userid) throws ParseException {
-
-        Reservation reservation = new Reservation(5,reservationRequest.getNumberOfSeats(),
-                reservationRequest.getTimeStamp(),reservationRequest.getStatus());
-        User user = userService.getUserById(userid);
-        MovieSchedule movieSchedule= movieScheduleService.getMovieSchedule(scheduleId);
-        reservation.setUser(user);
-        reservation.setMovieSchedule(movieSchedule);
-        reservationService.save(reservation);
-    }*/
+    @RequestMapping(value = "/deleteReservation/{reservationID}")
+    public void deleteReservation(@PathVariable Integer reservationID) {
+        reservationService.deleteUserReservation(reservationID);
+    }
 
     @RequestMapping(method = RequestMethod.POST ,value="/movieschedule/{scheduleId}/reservation")
     public void saveNewReservation(@RequestHeader("Authorization") String authHeader,
                                    @RequestBody ReservationRequest reservationRequest, @PathVariable Integer scheduleId) throws ParseException {
         String uName = jwtTokenUtil.extraUsername(authHeader.split(" ")[1]);
+        System.out.println();
         MovieSchedule movieSchedule= movieScheduleService.getMovieSchedule(scheduleId);
-
         Reservation reservation = new Reservation(0,
                 reservationRequest.getNumberOfSeats(),
                 reservationRequest.getTimeStamp(),
@@ -78,13 +69,9 @@ public class ReservationController {
         User user = userService.getByUsername(uName);
         reservation.setUser(user);
         reservation.setMovieSchedule(movieSchedule);
-        Reservation savedReservation =  reservationService.save(reservation);
         reservation.setDateStamp(Date.valueOf(today));
-
-        //System.out.println(savedReservation.getReservation_id());
+        Reservation savedReservation =  reservationService.save(reservation);
         String[] seats = reservationRequest.getSeatIds();
-
-        System.out.println(Arrays.toString(seats));
         for (String seatId : seats) {
             ShowSeat seat = new ShowSeat();
             seat.setPrice(0);
@@ -92,7 +79,6 @@ public class ReservationController {
             seat.setStatus(reservationRequest.getStatus());
             seat.setMovieSchedule(movieSchedule);
             seat.setReservation(savedReservation);
-
             showSeatService.saveShowSeat(seat);
         }
     }

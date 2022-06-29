@@ -5,6 +5,7 @@ import com.teameth.moviebooking.domain.*;
 import com.teameth.moviebooking.models.MovieRequest;
 import com.teameth.moviebooking.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
@@ -73,11 +74,6 @@ public class MovieScheduleController {
         List<MovieSchedule> movieScheduleList = movieScheduleService.getAllMovieSchedule();
         List<MovieSchedule> tobeReturned= new ArrayList<>();
         for(MovieSchedule ms :movieScheduleList){
-            System.out.println(ms.getStart_time());
-            System.out.println("curr"+Time.valueOf(LocalTime.now()));
-            System.out.println(ms.getDate());
-            System.out.println("curr"+Date.valueOf(LocalDate.now()));
-
             if(ms.getMovie().getmovieid() == movieId &&
                     ( (ms.getDate().after(Date.valueOf(LocalDate.now()))) ||
                     (   ms.getDate().toLocalDate().equals(LocalDate.now())
@@ -88,7 +84,8 @@ public class MovieScheduleController {
         }
         return tobeReturned;
     }
-    @RequestMapping("/schedule/{scheduleId}")
+    @RequestMapping("/scheduleSeats/{scheduleId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public List<Integer> getHallSeats(@PathVariable Integer scheduleId){
        List<Integer> listOfSeats = new ArrayList<>();
       MovieSchedule movieSchedule = movieScheduleService.getMovieSchedule(scheduleId);
@@ -100,7 +97,8 @@ public class MovieScheduleController {
        return listOfSeats;
     }
 
-    @RequestMapping("/schedule/{scheduleId}/getShowseats")
+    @RequestMapping("/scheduleSeats/{scheduleId}/getShowseats")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public List<Integer> getShowSeats(@PathVariable Integer scheduleId){
         List<Integer> listOfSeats = new ArrayList<>();
        // MovieSchedule movieSchedule = movieScheduleService.getMovieSchedule(scheduleId);
